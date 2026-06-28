@@ -44,16 +44,130 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Prayer Times TV',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0B1320),
+      theme: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: const Color(0xFFEEEEEE),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1ABC9C),
-          brightness: Brightness.dark,
+          seedColor: const Color(0xFF3D7A78),
+          brightness: Brightness.light,
         ),
       ),
       home: const SplashRouter(),
     );
   }
+}
+
+// ============================================================================
+// DESIGN TOKENS
+// ============================================================================
+
+class AppColors {
+  static const background     = Color(0xFFEEEEEE);
+  static const panelLeft      = Color(0xFFE5E5E5);
+  static const panelRight     = Color(0xFFF5F5F5);
+  static const activeTeal     = Color(0xFF3D7A78);
+  static const activeTealLight= Color(0xFF4E9593);
+  static const textPrimary    = Color(0xFF1A1A1A);
+  static const textSecondary  = Color(0xFF555555);
+  static const textMuted      = Color(0xFF888888);
+  static const divider        = Color(0xFFCCCCCC);
+  static const border         = Color(0xFFBBBBBB);
+}
+
+class AppTextStyles {
+  static const salahLabel = TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 1.8,
+    color: AppColors.textPrimary,
+  );
+  static const timeNormal = TextStyle(
+    fontSize: 32,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textPrimary,
+    letterSpacing: 1.2,
+  );
+  static const iqamahNormal = TextStyle(
+    fontSize: 40,
+    fontWeight: FontWeight.w900,
+    color: AppColors.textPrimary,
+    letterSpacing: 1.0,
+  );
+  static const salahLabelActive = TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 1.8,
+    color: Colors.white,
+  );
+  static const timeActive = TextStyle(
+    fontSize: 32,
+    fontWeight: FontWeight.w400,
+    color: Colors.white70,
+    letterSpacing: 1.2,
+  );
+  static const iqamahActive = TextStyle(
+    fontSize: 40,
+    fontWeight: FontWeight.w900,
+    color: Colors.white,
+    letterSpacing: 1.0,
+  );
+  static const columnHeader = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 2.5,
+    color: AppColors.textMuted,
+  );
+  static const dateGregorian = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 1.5,
+    color: AppColors.textPrimary,
+  );
+  static const dateHijri = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 1.2,
+    color: AppColors.textSecondary,
+  );
+  static const clockMain = TextStyle(
+    fontSize: 72,
+    fontWeight: FontWeight.w900,
+    color: AppColors.textPrimary,
+    letterSpacing: -2,
+  );
+  static const clockAmPm = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textSecondary,
+  );
+  static const nextLabel = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 2.0,
+    color: AppColors.activeTeal,
+  );
+  static const nextCountdown = TextStyle(
+    fontSize: 44,
+    fontWeight: FontWeight.w900,
+    color: AppColors.activeTeal,
+    letterSpacing: 1.0,
+  );
+  static const sectionLabel = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 2.0,
+    color: AppColors.textSecondary,
+  );
+  static const sunriseLabel = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 1.5,
+    color: AppColors.textSecondary,
+  );
+  static const sunriseTime = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w700,
+    color: AppColors.textPrimary,
+  );
 }
 
 // ============================================================================
@@ -89,7 +203,7 @@ class Mosque {
 }
 
 class DayPrayerTimes {
-  final String date; // yyyy-MM-dd
+  final String date;
   final String fajr;
   final String sunrise;
   final String dhuhr;
@@ -129,7 +243,7 @@ class DayPrayerTimes {
 }
 
 // ============================================================================
-// MOCK DATA (used while there is no live backend to hit)
+// MOCK DATA
 // ============================================================================
 
 class MockData {
@@ -144,8 +258,6 @@ class MockData {
   ]
   ''';
 
-  /// Generates a believable month of prayer times so the UI/caching logic
-  /// can be tested end-to-end without a real API.
   static List<Map<String, dynamic>> generateMonthlyMock(int year, int month) {
     final daysInMonth = DateTime(year, month + 1, 0).day;
     final List<Map<String, dynamic>> days = [];
@@ -153,7 +265,7 @@ class MockData {
       final date = DateTime(year, month, d);
       final dateStr =
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-      final shiftMin = d % 10; // tiny daily drift, like real solar tables
+      final shiftMin = d % 10;
       days.add({
         'date': dateStr,
         'fajr': _shiftTime('05:10', shiftMin),
@@ -171,14 +283,8 @@ class MockData {
     final parts = base.split(':');
     int h = int.parse(parts[0]);
     int m = int.parse(parts[1]) + minutes;
-    if (m < 0) {
-      m += 60;
-      h -= 1;
-    }
-    if (m >= 60) {
-      m -= 60;
-      h += 1;
-    }
+    if (m < 0) { m += 60; h -= 1; }
+    if (m >= 60) { m -= 60; h += 1; }
     h = h % 24;
     if (h < 0) h += 24;
     return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
@@ -190,10 +296,7 @@ class MockData {
 // ============================================================================
 
 class PrayerApiService {
-  /// Flip to false once a real backend is wired up.
   static const bool useMockData = true;
-
-  /// Replace with your real API base URL.
   static const String baseUrl = 'https://your-api.example.com/api';
 
   static Future<List<Mosque>> searchMosques(String query) async {
@@ -206,9 +309,7 @@ class PrayerApiService {
           .toList();
       return filtered.map((e) => Mosque.fromJson(e)).toList();
     }
-
-    final uri =
-        Uri.parse('$baseUrl/mosques/search?q=${Uri.encodeQueryComponent(query)}');
+    final uri = Uri.parse('$baseUrl/mosques/search?q=${Uri.encodeQueryComponent(query)}');
     final res = await http.get(uri);
     if (res.statusCode == 200) {
       final List<dynamic> data = json.decode(res.body);
@@ -217,7 +318,6 @@ class PrayerApiService {
     throw Exception('Failed to search mosques (${res.statusCode})');
   }
 
-  /// Fetches the FULL month of prayer times for a mosque in one call.
   static Future<List<DayPrayerTimes>> fetchMonthlyTimes(
       String mosqueId, int year, int month) async {
     if (useMockData) {
@@ -225,7 +325,6 @@ class PrayerApiService {
       final raw = MockData.generateMonthlyMock(year, month);
       return raw.map((e) => DayPrayerTimes.fromJson(e)).toList();
     }
-
     final uri = Uri.parse(
         '$baseUrl/mosques/$mosqueId/prayer-times?year=$year&month=$month');
     final res = await http.get(uri);
@@ -238,7 +337,7 @@ class PrayerApiService {
 }
 
 // ============================================================================
-// LOCAL CACHE (shared_preferences)
+// LOCAL CACHE
 // ============================================================================
 
 class CacheService {
@@ -265,9 +364,6 @@ class CacheService {
   static String _monthKey(String mosqueId, int year, int month) =>
       '$_cachedDataPrefix${mosqueId}_${year}_$month';
 
-  /// Returns cached data ONLY if it matches the requested year/month.
-  /// If the month has rolled over, this naturally returns null and the
-  /// caller knows it needs to hit the API again.
   static Future<List<DayPrayerTimes>?> getCachedMonth(
       String mosqueId, int year, int month) async {
     final prefs = await SharedPreferences.getInstance();
@@ -284,7 +380,6 @@ class CacheService {
     await prefs.setString(_monthKey(mosqueId, year, month), raw);
   }
 
-  /// Keeps storage tidy by dropping months other than the current one.
   static Future<void> clearOldMonths(
       String mosqueId, int currentYear, int currentMonth) async {
     final prefs = await SharedPreferences.getInstance();
@@ -300,29 +395,86 @@ class CacheService {
 }
 
 // ============================================================================
-// REPOSITORY — ties API + cache together
+// IQAMAH SETTINGS — per-prayer offset in minutes, persisted locally
+// ============================================================================
+
+class IqamahSettings {
+  final int fajr;
+  final int dhuhr;
+  final int asr;
+  final int maghrib;
+  final int isha;
+
+  const IqamahSettings({
+    this.fajr    = 20,
+    this.dhuhr   = 20,
+    this.asr     = 20,
+    this.maghrib = 10,
+    this.isha    = 20,
+  });
+
+  IqamahSettings copyWith({int? fajr, int? dhuhr, int? asr, int? maghrib, int? isha}) =>
+      IqamahSettings(
+        fajr:    fajr    ?? this.fajr,
+        dhuhr:   dhuhr   ?? this.dhuhr,
+        asr:     asr     ?? this.asr,
+        maghrib: maghrib ?? this.maghrib,
+        isha:    isha    ?? this.isha,
+      );
+
+  int forLabel(String upperLabel) {
+    switch (upperLabel) {
+      case 'FAJR':    return fajr;
+      case 'DHUHR':   return dhuhr;
+      case 'ASR':     return asr;
+      case 'MAGHRIB': return maghrib;
+      case 'ISHA':    return isha;
+      default:        return 20;
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+    'fajr': fajr, 'dhuhr': dhuhr, 'asr': asr, 'maghrib': maghrib, 'isha': isha,
+  };
+
+  factory IqamahSettings.fromJson(Map<String, dynamic> j) => IqamahSettings(
+    fajr:    (j['fajr']    as int?) ?? 20,
+    dhuhr:   (j['dhuhr']   as int?) ?? 20,
+    asr:     (j['asr']     as int?) ?? 20,
+    maghrib: (j['maghrib'] as int?) ?? 10,
+    isha:    (j['isha']    as int?) ?? 20,
+  );
+}
+
+class IqamahService {
+  static const _key = 'iqamah_settings';
+
+  static Future<IqamahSettings> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_key);
+    if (raw == null) return const IqamahSettings();
+    return IqamahSettings.fromJson(json.decode(raw));
+  }
+
+  static Future<void> save(IqamahSettings s) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_key, json.encode(s.toJson()));
+  }
+}
+
+// ============================================================================
+// REPOSITORY
 // ============================================================================
 
 class PrayerTimesRepository {
-  /// Cache-first month loader.
-  /// - If a cache entry exists for THIS year/month, returns it instantly,
-  ///   no network call at all.
-  /// - If not (first selection, or the month just changed), fetches the
-  ///   whole month from the API once and stores it for next time.
   static Future<List<DayPrayerTimes>> getMonth(String mosqueId,
       {bool forceRefresh = false}) async {
     final now = DateTime.now();
-
     if (!forceRefresh) {
-      final cached = await CacheService.getCachedMonth(
-          mosqueId, now.year, now.month);
-      if (cached != null && cached.isNotEmpty) {
-        return cached;
-      }
+      final cached = await CacheService.getCachedMonth(mosqueId, now.year, now.month);
+      if (cached != null && cached.isNotEmpty) return cached;
     }
-
-    final fresh =
-        await PrayerApiService.fetchMonthlyTimes(mosqueId, now.year, now.month);
+    final fresh = await PrayerApiService.fetchMonthlyTimes(mosqueId, now.year, now.month);
     await CacheService.saveMonth(mosqueId, now.year, now.month, fresh);
     await CacheService.clearOldMonths(mosqueId, now.year, now.month);
     return fresh;
@@ -330,7 +482,7 @@ class PrayerTimesRepository {
 }
 
 // ============================================================================
-// SPLASH / ROUTER — sends user to search or straight to today's times
+// SPLASH / ROUTER
 // ============================================================================
 
 class SplashRouter extends StatefulWidget {
@@ -363,12 +515,15 @@ class _SplashRouterState extends State<SplashRouter> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const Scaffold(
+      backgroundColor: AppColors.background,
+      body: Center(child: CircularProgressIndicator(color: AppColors.activeTeal)),
+    );
   }
 }
 
 // ============================================================================
-// SCREEN 1 — SEARCH MOSQUE
+// SCREEN 1 — SEARCH MOSQUE  (light theme)
 // ============================================================================
 
 class MosqueSearchScreen extends StatefulWidget {
@@ -395,10 +550,7 @@ class _MosqueSearchScreenState extends State<MosqueSearchScreen> {
       setState(() => _results = []);
       return;
     }
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+    setState(() { _loading = true; _error = null; });
     try {
       final results = await PrayerApiService.searchMosques(query.trim());
       setState(() => _results = results);
@@ -427,48 +579,77 @@ class _MosqueSearchScreenState extends State<MosqueSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 48),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Find your mosque',
-                  style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _controller,
-                autofocus: true,
-                onChanged: _onChanged,
-                style: const TextStyle(fontSize: 24),
-                decoration: InputDecoration(
-                  hintText: 'Search mosque name...',
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.white10,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 5,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.activeTeal,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'FIND YOUR MOSQUE',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 3.0,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              // Search field
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: TextField(
+                  controller: _controller,
+                  autofocus: true,
+                  onChanged: _onChanged,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: const InputDecoration(
+                    hintText: 'Search mosque name...',
+                    hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 20),
+                    prefixIcon: Icon(Icons.search, color: AppColors.activeTeal, size: 26),
+                    filled: false,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-              if (_loading) const Center(child: CircularProgressIndicator()),
+              const SizedBox(height: 28),
+              if (_loading)
+                const Center(child: CircularProgressIndicator(color: AppColors.activeTeal)),
               if (_error != null)
                 Text(_error!,
                     style: const TextStyle(color: Colors.redAccent, fontSize: 18)),
               Expanded(
-                child: ListView.builder(
+                child: ListView.separated(
                   itemCount: _results.length,
+                  separatorBuilder: (_, __) =>
+                      const Divider(color: AppColors.divider, height: 1),
                   itemBuilder: (context, index) {
                     final mosque = _results[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: _MosqueTile(
-                        mosque: mosque,
-                        onTap: () => _selectMosque(mosque),
-                      ),
-                    );
+                    return _MosqueTile(mosque: mosque, onTap: () => _selectMosque(mosque));
                   },
                 ),
               ),
@@ -488,33 +669,38 @@ class _MosqueTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white10,
-      borderRadius: BorderRadius.circular(10),
+      color: Colors.white,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        focusColor: Colors.teal.withOpacity(0.35),
-        hoverColor: Colors.teal.withOpacity(0.15),
+        focusColor: AppColors.activeTeal.withOpacity(0.12),
+        hoverColor: AppColors.activeTeal.withOpacity(0.06),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           child: Row(
             children: [
-              const Icon(Icons.mosque, size: 28),
-              const SizedBox(width: 16),
+              const Icon(Icons.mosque, size: 28, color: AppColors.activeTeal),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(mosque.name,
                         style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.w600)),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          letterSpacing: 0.5,
+                        )),
+                    const SizedBox(height: 2),
                     Text('${mosque.address}, ${mosque.city}',
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.white70)),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: AppColors.textSecondary,
+                        )),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right),
+              const Icon(Icons.chevron_right, color: AppColors.textMuted),
             ],
           ),
         ),
@@ -524,7 +710,7 @@ class _MosqueTile extends StatelessWidget {
 }
 
 // ============================================================================
-// SCREEN 2 — PRAYER TIMES (today, from the cached/fetched month)
+// SCREEN 2 — PRAYER TIMES  (two-column mosque board layout)
 // ============================================================================
 
 class PrayerTimesScreen extends StatefulWidget {
@@ -540,10 +726,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   bool _loading = true;
   String? _error;
 
-  // Live clock + countdown state.
+  IqamahSettings _iqamahSettings = const IqamahSettings();
+
   Timer? _ticker;
   DateTime _now = DateTime.now();
-  DateTime? _loadedForMonth; // tracks which month the cache/API load covered
+  DateTime? _loadedForMonth;
 
   static const List<String> _prayerOrder = [
     'Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'
@@ -552,9 +739,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   @override
   void initState() {
     super.initState();
+    _loadIqamahSettings();
     _load();
-    // Ticks every second to refresh the clock + countdown, and quietly
-    // reloads the month if it rolls over while the screen stays open.
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       final now = DateTime.now();
       setState(() => _now = now);
@@ -566,6 +752,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     });
   }
 
+  Future<void> _loadIqamahSettings() async {
+    final s = await IqamahService.load();
+    if (mounted) setState(() => _iqamahSettings = s);
+  }
+
   @override
   void dispose() {
     _ticker?.cancel();
@@ -573,13 +764,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   }
 
   Future<void> _load({bool forceRefresh = false}) async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+    setState(() { _loading = true; _error = null; });
     try {
-      final days = await PrayerTimesRepository.getMonth(widget.mosque.id,
-          forceRefresh: forceRefresh);
+      final days = await PrayerTimesRepository.getMonth(
+          widget.mosque.id, forceRefresh: forceRefresh);
       setState(() {
         _month = days;
         _loadedForMonth = DateTime.now();
@@ -603,30 +791,45 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   DateTime _parseTime(String hhmm, DateTime date) {
     final parts = hhmm.split(':');
     return DateTime(
-        date.year, date.month, date.day, int.parse(parts[0]), int.parse(parts[1]));
+        date.year, date.month, date.day,
+        int.parse(parts[0]), int.parse(parts[1]));
   }
 
-  /// Finds the next upcoming prayer (skips Sunrise, it isn't a prayer).
-  /// Rolls over to tomorrow's Fajr once all of today's have passed.
-  ({String label, DateTime time})? get _nextPrayer {
+  Map<String, String> get _todayTimesMap {
     final todayDay = _today;
-    if (todayDay == null) return null;
-
-    final timesMap = {
+    if (todayDay == null) return {};
+    return {
       'Fajr': todayDay.fajr,
       'Dhuhr': todayDay.dhuhr,
       'Asr': todayDay.asr,
       'Maghrib': todayDay.maghrib,
       'Isha': todayDay.isha,
     };
+  }
 
+  /// The prayer that has already started but the next one hasn't yet.
+  /// This is the row that stays highlighted.
+  ({String label, DateTime time})? get _currentPrayer {
+    final timesMap = _todayTimesMap;
+    if (timesMap.isEmpty) return null;
+    ({String label, DateTime time})? last;
     for (final name in _prayerOrder) {
       final dt = _parseTime(timesMap[name]!, _now);
-      if (dt.isAfter(_now)) {
-        return (label: name, time: dt);
+      if (!dt.isAfter(_now)) {
+        last = (label: name.toUpperCase(), time: dt);
       }
     }
+    return last;
+  }
 
+  /// The next prayer that hasn't started yet.
+  ({String label, DateTime time})? get _nextPrayer {
+    final timesMap = _todayTimesMap;
+    if (timesMap.isEmpty) return null;
+    for (final name in _prayerOrder) {
+      final dt = _parseTime(timesMap[name]!, _now);
+      if (dt.isAfter(_now)) return (label: name, time: dt);
+    }
     final tomorrow = _now.add(const Duration(days: 1));
     final tomorrowStr =
         '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
@@ -637,6 +840,29 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     return null;
   }
 
+  /// Iqamah countdown: visible only after the current prayer start and before
+  /// iqamah time. Returns null when iqamah hasn't come yet or has already passed.
+  ({String label, Duration remaining})? get _iqamahCountdown {
+    final current = _currentPrayer;
+    if (current == null) return null;
+    final offsetMin = _iqamahSettings.forLabel(current.label);
+    final iqamahTime = current.time.add(Duration(minutes: offsetMin));
+    if (_now.isAfter(iqamahTime)) return null;
+    final remaining = iqamahTime.difference(_now);
+    return (label: current.label, remaining: remaining);
+  }
+
+  Future<void> _openSettings() async {
+    final updated = await Navigator.of(context).push<IqamahSettings>(
+      MaterialPageRoute(
+        builder: (_) => IqamahSettingsScreen(current: _iqamahSettings),
+      ),
+    );
+    if (updated != null && mounted) {
+      setState(() => _iqamahSettings = updated);
+    }
+  }
+
   String _formatCountdown(Duration d) {
     if (d.isNegative) return '00:00:00';
     final h = d.inHours.toString().padLeft(2, '0');
@@ -645,11 +871,21 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     return '$h:$m:$s';
   }
 
-  String _formatClock(DateTime t) {
-    final hh = t.hour.toString().padLeft(2, '0');
+  String _formatClockHHMM(DateTime t) {
+    final h = t.hour > 12 ? t.hour - 12 : (t.hour == 0 ? 12 : t.hour);
     final mm = t.minute.toString().padLeft(2, '0');
-    final ss = t.second.toString().padLeft(2, '0');
-    return '$hh:$mm:$ss';
+    return '${h.toString().padLeft(2, '0')}:$mm';
+  }
+
+  String _amPm(DateTime t) => t.hour >= 12 ? 'PM' : 'AM';
+
+  String _formatDate() {
+    final now = DateTime.now();
+    const months = [
+      'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+      'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+    ];
+    return '${months[now.month - 1]} ${now.day}, ${now.year}';
   }
 
   Future<void> _changeMosque() async {
@@ -660,212 +896,777 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  String _formatToday() {
-    final now = DateTime.now();
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return '${now.day} ${months[now.month - 1]} ${now.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator(color: AppColors.activeTeal)),
+      );
+    }
+    if (_error != null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: Text(_error!,
+              style: const TextStyle(fontSize: 22, color: Colors.redAccent)),
+        ),
+      );
+    }
+
     final today = _today;
+    final current = _currentPrayer;
     final next = _nextPrayer;
+    final iqamah = _iqamahCountdown;
+
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(60),
-          child: _loading
-              ? const Center(child: CircularProgressIndicator())
-              : _error != null
-                  ? Center(
-                      child: Text(_error!,
-                          style: const TextStyle(
-                              fontSize: 22, color: Colors.redAccent)))
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(widget.mosque.name,
-                                    style: const TextStyle(
-                                        fontSize: 34,
-                                        fontWeight: FontWeight.bold)),
-                                Text(widget.mosque.city,
-                                    style: const TextStyle(
-                                        fontSize: 20, color: Colors.white70)),
-                              ],
+        child: Column(
+          children: [
+            // ── Top bar ──────────────────────────────────────────────────
+            _TopBar(
+              mosqueName: widget.mosque.name,
+              mosqueCity: widget.mosque.city,
+              onRefresh: () => _load(forceRefresh: true),
+              onChangeMosque: _changeMosque,
+              onSettings: _openSettings,
+            ),
+            // ── Main body — two-column split ─────────────────────────────
+            Expanded(
+              child: Row(
+                children: [
+                  // LEFT: prayer table — highlighted row = current (started) prayer
+                  Expanded(
+                    flex: 58,
+                    child: Container(
+                      color: AppColors.panelLeft,
+                      child: today == null
+                          ? const SizedBox()
+                          : _PrayerTable(
+                              day: today,
+                              activeLabel: current?.label,
+                              iqamahSettings: _iqamahSettings,
+                              now: _now,
                             ),
-                            Row(
-                              children: [
-                                _RemoteButton(
-                                  label: 'Refresh',
-                                  icon: Icons.refresh,
-                                  onTap: () => _load(forceRefresh: true),
-                                ),
-                                const SizedBox(width: 16),
-                                _RemoteButton(
-                                  label: 'Change mosque',
-                                  icon: Icons.swap_horiz,
-                                  onTap: _changeMosque,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(_formatToday(),
-                                style: const TextStyle(
-                                    fontSize: 22, color: Colors.tealAccent)),
-                            Text(_formatClock(_now),
-                                style: const TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5)),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        if (next != null)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.tealAccent.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(14),
-                              border:
-                                  Border.all(color: Colors.tealAccent, width: 1.5),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.access_time_filled,
-                                    color: Colors.tealAccent, size: 28),
-                                const SizedBox(width: 12),
-                                Text('Next: ${next.label}',
-                                    style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w600)),
-                                const Spacer(),
-                                Text(
-                                  _formatCountdown(next.time.difference(_now)),
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.tealAccent,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 24),
-                        if (today != null)
-                          Expanded(
-                            child: _PrayerGrid(day: today, nextLabel: next?.label),
-                          ),
-                      ],
                     ),
+                  ),
+                  // divider
+                  Container(width: 1, color: AppColors.divider),
+                  // RIGHT: clock + next prayer + iqamah countdown
+                  Expanded(
+                    flex: 42,
+                    child: Container(
+                      color: AppColors.panelRight,
+                      child: _RightPanel(
+                        now: _now,
+                        formatClock: _formatClockHHMM,
+                        amPm: _amPm,
+                        formatDate: _formatDate,
+                        next: next,
+                        iqamahCountdown: iqamah,
+                        formatCountdown: _formatCountdown,
+                        today: today,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // ── Decorative footer strip ──────────────────────────────────
+            Container(
+              height: 6,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.activeTeal, AppColors.activeTealLight, AppColors.activeTeal],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _PrayerGrid extends StatelessWidget {
+// ─── Top bar ─────────────────────────────────────────────────────────────────
+
+class _TopBar extends StatelessWidget {
+  final String mosqueName;
+  final String mosqueCity;
+  final VoidCallback onRefresh;
+  final VoidCallback onChangeMosque;
+  final VoidCallback onSettings;
+  const _TopBar({
+    required this.mosqueName,
+    required this.mosqueCity,
+    required this.onRefresh,
+    required this.onChangeMosque,
+    required this.onSettings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.activeTeal,
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+      child: Row(
+        children: [
+          const Icon(Icons.mosque, color: Colors.white70, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  mosqueName.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2.0,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  mosqueCity,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.white70,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _RemoteButton(label: 'IQAMAH', icon: Icons.tune, onTap: onSettings),
+          const SizedBox(width: 12),
+          _RemoteButton(label: 'REFRESH', icon: Icons.refresh, onTap: onRefresh),
+          const SizedBox(width: 12),
+          _RemoteButton(label: 'CHANGE', icon: Icons.swap_horiz, onTap: onChangeMosque),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Left panel: prayer table ─────────────────────────────────────────────────
+
+class _PrayerTable extends StatelessWidget {
   final DayPrayerTimes day;
-  final String? nextLabel;
-  const _PrayerGrid({required this.day, this.nextLabel});
+  final String? activeLabel;
+  final IqamahSettings iqamahSettings;
+  final DateTime now;
+
+  const _PrayerTable({
+    required this.day,
+    required this.now,
+    required this.iqamahSettings,
+    this.activeLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
     final entries = <(String, String, IconData)>[
-      ('Fajr', day.fajr, Icons.nightlight_round),
-      ('Sunrise', day.sunrise, Icons.wb_twilight),
-      ('Dhuhr', day.dhuhr, Icons.wb_sunny),
-      ('Asr', day.asr, Icons.cloud_outlined),
-      ('Maghrib', day.maghrib, Icons.brightness_4),
-      ('Isha', day.isha, Icons.nights_stay),
+      ('FAJR',    day.fajr,    Icons.nightlight_round),
+      ('DHUHR',   day.dhuhr,   Icons.wb_sunny),
+      ('ASR',     day.asr,     Icons.cloud_outlined),
+      ('MAGHRIB', day.maghrib, Icons.brightness_4),
+      ('ISHA',    day.isha,    Icons.nights_stay),
     ];
 
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 24,
-        crossAxisSpacing: 24,
-        childAspectRatio: 1.6,
-      ),
-      itemCount: entries.length,
-      itemBuilder: (context, index) {
-        final (label, time, icon) = entries[index];
-        final isNext = nextLabel != null && label == nextLabel;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          decoration: BoxDecoration(
-            color: isNext ? Colors.tealAccent.withOpacity(0.20) : Colors.white10,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isNext ? Colors.tealAccent : Colors.white12,
-              width: isNext ? 2.5 : 1,
-            ),
-            boxShadow: isNext
-                ? [
-                    BoxShadow(
-                      color: Colors.tealAccent.withOpacity(0.35),
-                      blurRadius: 20,
-                      spreadRadius: 1,
-                    ),
-                  ]
-                : null,
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon,
-                  size: 32, color: isNext ? Colors.white : Colors.tealAccent),
-              const SizedBox(height: 12),
-              Text(label,
-                  style: TextStyle(
-                    fontSize: 22,
-                    color: isNext ? Colors.white : Colors.white70,
-                    fontWeight: isNext ? FontWeight.bold : FontWeight.normal,
-                  )),
-              const SizedBox(height: 8),
-              Text(time,
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: isNext ? Colors.tealAccent : Colors.white,
-                  )),
-              if (isNext)
-                const Padding(
-                  padding: EdgeInsets.only(top: 6),
-                  child: Text(
-                    'NEXT',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.tealAccent,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+          child: Row(
+            children: const [
+              Expanded(flex: 44, child: Text('SALAH',  style: AppTextStyles.columnHeader)),
+              Expanded(flex: 28, child: Center(child: Text('STARTS', style: AppTextStyles.columnHeader))),
+              Expanded(flex: 28, child: Center(child: Text('IQAMAH', style: AppTextStyles.columnHeader))),
             ],
           ),
-        );
-      },
+        ),
+        Container(height: 1, color: AppColors.divider),
+        Expanded(
+          child: ListView.separated(
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: entries.length,
+            separatorBuilder: (_, __) =>
+                Container(height: 1, color: AppColors.divider),
+            itemBuilder: (context, i) {
+              final (label, starts, icon) = entries[i];
+              final isActive = activeLabel != null && label == activeLabel;
+              final offsetMin = iqamahSettings.forLabel(label);
+              return _PrayerRow(
+                label: label,
+                icon: icon,
+                starts: starts,
+                iqamahOffset: offsetMin,
+                isActive: isActive,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
+
+class _PrayerRow extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final String starts;
+  final int iqamahOffset;   // minutes after adhan
+  final bool isActive;
+  const _PrayerRow({
+    required this.label,
+    required this.icon,
+    required this.starts,
+    required this.iqamahOffset,
+    required this.isActive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      color: isActive ? AppColors.activeTeal : Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 0),
+      height: null,
+      child: IntrinsicHeight(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Salah label + icon
+              Expanded(
+                flex: 44,
+                child: Row(
+                  children: [
+                    Icon(icon,
+                        size: 26,
+                        color: isActive ? Colors.white70 : AppColors.activeTeal),
+                    const SizedBox(width: 14),
+                    Text(label,
+                        style: isActive
+                            ? AppTextStyles.salahLabelActive
+                            : AppTextStyles.salahLabel),
+                  ],
+                ),
+              ),
+              // Starts time
+              Expanded(
+                flex: 28,
+                child: Center(
+                  child: Text(starts,
+                      style: isActive
+                          ? AppTextStyles.timeActive
+                          : AppTextStyles.timeNormal),
+                ),
+              ),
+              // Iqamah offset badge: "+N min"
+              Expanded(
+                flex: 28,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? Colors.white.withOpacity(0.18)
+                          : AppColors.activeTeal.withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: isActive
+                            ? Colors.white.withOpacity(0.35)
+                            : AppColors.activeTeal.withOpacity(0.30),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '+$iqamahOffset min',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                        color: isActive ? Colors.white : AppColors.activeTeal,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Right panel ─────────────────────────────────────────────────────────────
+
+class _RightPanel extends StatelessWidget {
+  final DateTime now;
+  final String Function(DateTime) formatClock;
+  final String Function(DateTime) amPm;
+  final String Function() formatDate;
+  final ({String label, DateTime time})? next;
+  final ({String label, Duration remaining})? iqamahCountdown;
+  final String Function(Duration) formatCountdown;
+  final DayPrayerTimes? today;
+
+  const _RightPanel({
+    required this.now,
+    required this.formatClock,
+    required this.amPm,
+    required this.formatDate,
+    required this.next,
+    required this.iqamahCountdown,
+    required this.formatCountdown,
+    required this.today,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Date
+          Text(formatDate(), style: AppTextStyles.dateGregorian),
+          const SizedBox(height: 4),
+          // Sunrise / Ishraq row
+          if (today != null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _SunInfo(label: 'SUNRISE', time: today!.sunrise),
+                const SizedBox(width: 24),
+                _SunInfo(label: 'ISHRAQ', time: _ishraq(today!.sunrise)),
+              ],
+            ),
+          const SizedBox(height: 16),
+          // Big clock
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(formatClock(now), style: AppTextStyles.clockMain),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10, left: 6),
+                child: Text(amPm(now), style: AppTextStyles.clockAmPm),
+              ),
+            ],
+          ),
+          // Ornamental divider
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: _OrnamentDivider(),
+          ),
+
+          // ── Iqamah countdown (only visible when prayer has started and iqamah hasn't) ──
+          if (iqamahCountdown != null) ...[
+            const Text('IQAMAH IN', style: AppTextStyles.nextLabel),
+            const SizedBox(height: 6),
+            Text(
+              formatCountdown(iqamahCountdown!.remaining),
+              style: AppTextStyles.nextCountdown,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: _OrnamentDivider(),
+            ),
+          ],
+
+          // ── Next prayer block ──
+          if (next != null) ...[
+            const Text('NEXT PRAYER', style: AppTextStyles.nextLabel),
+            const SizedBox(height: 8),
+            Text(
+              next!.label.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2.5,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _formatTime12(next!.time),
+              style: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.w900,
+                color: AppColors.activeTeal,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Countdown to next prayer start
+            Text(
+              formatCountdown(next!.time.difference(now)),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+
+          const Spacer(),
+        ],
+      ),
+    );
+  }
+
+  String _ishraq(String sunrise) {
+    final parts = sunrise.split(':');
+    int h = int.parse(parts[0]);
+    int m = int.parse(parts[1]) + 15;
+    if (m >= 60) { m -= 60; h += 1; }
+    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+  }
+
+  String _formatTime12(DateTime t) {
+    final h = t.hour > 12 ? t.hour - 12 : (t.hour == 0 ? 12 : t.hour);
+    final mm = t.minute.toString().padLeft(2, '0');
+    final ap = t.hour >= 12 ? 'PM' : 'AM';
+    return '${h.toString().padLeft(2, '0')}:$mm $ap';
+  }
+}
+
+class _SunInfo extends StatelessWidget {
+  final String label;
+  final String time;
+  const _SunInfo({required this.label, required this.time});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text('$label ', style: AppTextStyles.sunriseLabel),
+        Text(time, style: AppTextStyles.sunriseTime),
+      ],
+    );
+  }
+}
+
+// ============================================================================
+// IQAMAH SETTINGS SCREEN
+// ============================================================================
+
+class IqamahSettingsScreen extends StatefulWidget {
+  final IqamahSettings current;
+  const IqamahSettingsScreen({super.key, required this.current});
+
+  @override
+  State<IqamahSettingsScreen> createState() => _IqamahSettingsScreenState();
+}
+
+class _IqamahSettingsScreenState extends State<IqamahSettingsScreen> {
+  late IqamahSettings _draft;
+  bool _saving = false;
+
+  static const List<(String, String)> _prayers = [
+    ('FAJR',    'Fajr'),
+    ('DHUHR',   'Dhuhr'),
+    ('ASR',     'Asr'),
+    ('MAGHRIB', 'Maghrib'),
+    ('ISHA',    'Isha'),
+  ];
+
+  // Allowed minute steps on the TV remote — easy to scroll through
+  static const List<int> _steps = [5, 10, 15, 20, 25, 30, 35, 40, 45, 60];
+
+  @override
+  void initState() {
+    super.initState();
+    _draft = widget.current;
+  }
+
+  void _setOffset(String upperKey, int value) {
+    setState(() {
+      switch (upperKey) {
+        case 'FAJR':    _draft = _draft.copyWith(fajr: value);    break;
+        case 'DHUHR':   _draft = _draft.copyWith(dhuhr: value);   break;
+        case 'ASR':     _draft = _draft.copyWith(asr: value);     break;
+        case 'MAGHRIB': _draft = _draft.copyWith(maghrib: value); break;
+        case 'ISHA':    _draft = _draft.copyWith(isha: value);    break;
+      }
+    });
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    await IqamahService.save(_draft);
+    if (mounted) Navigator.of(context).pop(_draft);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header bar
+            Container(
+              color: AppColors.activeTeal,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+              child: Row(
+                children: [
+                  Material(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(6),
+                      focusColor: Colors.white.withOpacity(0.25),
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        child: Icon(Icons.arrow_back, color: Colors.white, size: 22),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  const Text(
+                    'IQAMAH SETTINGS',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2.5,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_saving)
+                    const SizedBox(
+                      width: 24, height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2,
+                      ),
+                    )
+                  else
+                    _RemoteButton(label: 'SAVE', icon: Icons.check, onTap: _save),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+            // Subtitle
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 64),
+              child: const Text(
+                'Set how many minutes after adhan the iqamah begins for each prayer.',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: AppColors.textSecondary,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+            const SizedBox(height: 36),
+            // Prayer rows
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 64),
+                itemCount: _prayers.length,
+                separatorBuilder: (_, __) =>
+                    Container(height: 1, color: AppColors.divider, margin: const EdgeInsets.symmetric(vertical: 4)),
+                itemBuilder: (context, i) {
+                  final (key, label) = _prayers[i];
+                  final current = _draft.forLabel(key);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      children: [
+                        // Prayer name
+                        SizedBox(
+                          width: 160,
+                          child: Text(label.toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 2.0,
+                                color: AppColors.textPrimary,
+                              )),
+                        ),
+                        const SizedBox(width: 32),
+                        // Stepper buttons
+                        _StepButton(
+                          icon: Icons.remove,
+                          enabled: current > _steps.first,
+                          onTap: () {
+                            final idx = _steps.indexOf(current);
+                            if (idx > 0) _setOffset(key, _steps[idx - 1]);
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        // Current value display
+                        Container(
+                          width: 120,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: AppColors.activeTeal.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.activeTeal.withOpacity(0.35),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '+$current min',
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.activeTeal,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        _StepButton(
+                          icon: Icons.add,
+                          enabled: current < _steps.last,
+                          onTap: () {
+                            final idx = _steps.indexOf(current);
+                            if (idx < _steps.length - 1) _setOffset(key, _steps[idx + 1]);
+                          },
+                        ),
+                        const SizedBox(width: 32),
+                        // Quick-select chips
+                        Expanded(
+                          child: Wrap(
+                            spacing: 10,
+                            runSpacing: 8,
+                            children: _steps.map((m) {
+                              final selected = m == current;
+                              return _QuickChip(
+                                label: '+$m',
+                                selected: selected,
+                                onTap: () => _setOffset(key, m),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StepButton extends StatelessWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+  const _StepButton({required this.icon, required this.enabled, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: enabled ? AppColors.activeTeal : AppColors.divider,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        focusColor: AppColors.activeTealLight,
+        onTap: enabled ? onTap : null,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon,
+              size: 22,
+              color: enabled ? Colors.white : AppColors.textMuted),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _QuickChip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? AppColors.activeTeal : Colors.white,
+      borderRadius: BorderRadius.circular(6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(6),
+        focusColor: AppColors.activeTeal.withOpacity(0.2),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: selected ? AppColors.activeTeal : AppColors.border,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: selected ? Colors.white : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Ornamental divider ───────────────────────────────────────────────────────
+
+class _OrnamentDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.transparent, AppColors.activeTeal.withOpacity(0.4)],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Icon(Icons.auto_awesome,
+              size: 14, color: AppColors.activeTeal.withOpacity(0.6)),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.activeTeal.withOpacity(0.4), Colors.transparent],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Shared remote button ─────────────────────────────────────────────────────
 
 class _RemoteButton extends StatelessWidget {
   final String label;
@@ -876,20 +1677,26 @@ class _RemoteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white10,
-      borderRadius: BorderRadius.circular(10),
+      color: Colors.white.withOpacity(0.15),
+      borderRadius: BorderRadius.circular(6),
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        focusColor: Colors.tealAccent.withOpacity(0.25),
-        hoverColor: Colors.tealAccent.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(6),
+        focusColor: Colors.white.withOpacity(0.25),
+        hoverColor: Colors.white.withOpacity(0.12),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              Icon(icon, size: 20),
+              Icon(icon, size: 18, color: Colors.white),
               const SizedBox(width: 8),
-              Text(label, style: const TextStyle(fontSize: 16)),
+              Text(label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                    color: Colors.white,
+                  )),
             ],
           ),
         ),
